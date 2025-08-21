@@ -1,0 +1,1180 @@
+<usermanual>
+___________________________________________________________________________________________________________________	
+
+									Corsi Block-Tapping Task (Forward)
+___________________________________________________________________________________________________________________
+
+Script Author: David Nitz (dave@millisecond.com) for Millisecond Software, LLC (backward task)
+
+last updated:  10-11-2022 by K. Borchert (katjab@millisecond.com) for Millisecond Software, LLC
+Script Copyright © 10-11-2022 Millisecond Software
+
+Modified: 2024 by Zoe Niesen 
+___________________________________________________________________________________________________________________
+BACKGROUND INFO 	
+___________________________________________________________________________________________________________________	
+This script implements a version of the Forward Corsi Block Tapping Task; a measure of spatial working memory. 
+
+___________________________________________________________________________________________________________________
+TASK DESCRIPTION	
+___________________________________________________________________________________________________________________
+Participants are presented with a screen of 16 boxes. The boxes light up in a pre-fixed sequence (constant across participants)
+and participants are asked to click on the boxes in the same order they were lit.
+The sequence length starts at level = 3 boxes and increases up to level 5. 
+
+___________________________________________________________________________________________________________________	
+DURATION 
+___________________________________________________________________________________________________________________	
+the default set-up of the script takes appr. 1 minute to complete
+
+___________________________________________________________________________________________________________________	
+DATA FILE INFORMATION 
+___________________________________________________________________________________________________________________
+The default data stored in the data files are:
+
+(1) Raw data file: 'corsiblocktappingtask_raw*.iqdat' (a separate file for each participant)
+
+build:								The specific Inquisit version used (the 'build') that was run
+computer.platform:					the platform the script was run on (win/mac/ios/android)
+date, time: 						date and time script was run 
+subject, group: 					with the current subject/groupnumber
+session:							with the current session id
+
+ageGroup:							stores the age group information IF parameters.runAgeQuestion is set to 'true'
+									1: age <= 20; 
+									2: 21 < age < 40; 
+									3: age > 40
+										Note: based on Kessels et al (2000, table3). Due to overlapping age brackets reported in Kessels
+										et al (2000, table 3) for age group 1 and 2, in this script age group 1 includes age 20 
+										and age group 2 starts at age 21 
+										
+										
+//Screen Setup:
+(parameter) runAbsoluteSizes:		true (1) = should run absolutely sized canvas (see parameters- canvasHeight_inmm)
+									false (0) = should use proportionally sized canvas (uses width = 43*screenHeight)
+								
+canvasAdjustments:					NA: not applicable => parameters- runAbsoluteSize was set to 'false'
+									0: parameters- runAbsoluteSize was set to 'true' and screen size was large enough
+									1: parameters- runAbsoluteSize was set to 'true' BUT screen size was too small and 
+									adjustments had to be made
+
+activeCanvasHeight_inmm:			the width of the active canvas (by default: lightgray area) in mm 
+activeCanvasWidth_inmm:				the height of the active canvas in mm 
+display.canvasheight:				the height of the active canvas in pixels
+display.canvaswidth:				the width of the active canvas in pixels
+
+px_per_mm:							the conversion factor to convert pixel data into mm-results for the current monitor
+									(Note: the higher resolution of the current monitor 
+									the more pixels cover the same absolute screen distance)
+									This factor is needed if you want to convert pixel data into absolute mm data or the other way around											
+
+blockcode, blocknum:				the name and number of the current block (built-in Inquisit variable)
+trialcode, trialnum: 				the name and number of the currently recorded trial (built-in Inquisit variable)
+										Note: trialnum is a built-in Inquisit variable; it counts all trials run; even those
+										that do not store data to the data file such as feedback trials. Thus, trialnum 
+										may not reflect the number of main trials run per block.
+											
+seqnumber							The ordinal index number of the current block sequence. Seven sequences are given in ascending order.
+seqlength							Length of the current block sequence.
+seqstring							The current sequence (forward)
+respstring							The sequence entered by the participant (resets for each new sequence)
+response							the response of the participant in a given trial
+correct								'1' if the current sequence was recalled correctly. '0' if the participant made a mistake.
+latency								the latency of the response (in ms)
+								
+ncorrecttotal:						Total number of correctly recalled sequences across the whole task. (Max = 7)
+blockspan:							The achieved Block Span. Equals the length of the last correctly recalled sequence (Max = 5) 
+
+totalscore:							Computed as 'values.blockspan' * 'values.ncorrecttotal'.(Max = 7 * 5 = 35)
+									
+
+(2) Summary data file: 'corsiblocktappingtask_summary*.iqdat' (a separate file for each participant) 
+
+inquisit.version: 					Inquisit version run
+computer.platform:					the platform the script was run on (win/mac/ios/android)
+startdate:							date script was run
+starttime:							time script was started
+subjectid:							assigned subject id number
+groupid:							assigned group id number
+sessionid:							assigned session id number
+elapsedtime:						time it took to run script (in ms); measured from onset to offset of script
+completed:							0 = script was not completed (prematurely aborted); 
+									1 = script was completed (all conditions run)
+ncorrecttotal:						Total number of correctly recalled sequences across the whole task.
+									The achieved Block Span. Equals the length of the last correctly recalled sequence (Max = 9)
+totalscore							Summary score proposed by Kessels et al. (2000). Computed as 'values.blockspan' * 'values.ncorrecttotal'.										
+
+___________________________________________________________________________________________________________________	
+EXPERIMENTAL SET-UP 
+___________________________________________________________________________________________________________________
+* predetermined sequence of boxes (see section Editable Lists)
+* start level N=3 up to level 5
+___________________________________________________________________________________________________________________	
+INSTRUCTIONS 
+___________________________________________________________________________________________________________________
+see section Editable Instructions
+
+___________________________________________________________________________________________________________________	
+STIMULI
+___________________________________________________________________________________________________________________
+
+Note:
+The current script runs the task with absolute stimulus sizing to ensure that the size 
+of the Corsi blocks (with a target box size ~3cm) as well as their distances are constant across monitors.
+The default setupis optimized for touchscreen devices sized like an ipad but adapts to mouse use on non-touchscreens.
+	
+Is the current screen NOT big enough for the specified blocksizes, the script uses the largest 4:3 portion 
+of the current screen (e.g. smartphone screen) that it can find.
+	
+Absolute sizing of stimuli can easily be turned off or adjusted via parameter settings.
+___________________________________________________________________________________________________________________	
+EDITABLE CODE 
+___________________________________________________________________________________________________________________	
+check below for (relatively) easily editable parameters, stimuli, instructions etc. 
+Keep in mind that you can use this script as a template and therefore always "mess" with the entire code 
+to further customize your experiment.
+
+The parameters you can change are:
+
+</usermanual>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	EDITABLE PARAMETERS: change editable parameters here
+**************************************************************************************************************
+**************************************************************************************************************
+
+<parameters>
+//color parameter
+/blockcolor = blue					//Display color for blocks in unhighlighted state.
+/tapcolor = yellow					//Display color for currently highlighted ('tapped') blocks.
+/boardcolor	= black					//Display color for the virtual game board.
+/boardFrameColor = white			//Frame color of the virtual game board (if presented, see parameters.hideCanvasFrame)
+/screencolor = #1e1e1e  			//Color of the screen not used by the board (default: dark gray)
+/defaultTextColor = white			//Default color of textitems
+
+//CANVAS SIZING PARAMETERS
+//Screen Sizes		
+/runAbsoluteSizes = true			//true = runs absolutely sized canvas (see parameters.canvasHeight_inmm)
+									//false = uses proportionally sized canvas (uses width = 4/3*screenHeight)
+										
+/hideCanvasFrame = true				//true = the frame of the active canvas is turned off
+									//false = the frame of the active canvas is turned on (default).
+									//Note:									
+									//The Frame marks the size of the selected absolute canvas on different monitors.
+									//Without the canvas frame to anchor perception, absolute sized stimuli can appear vastly 
+									//different on differently sized monitors due to the large unused monitor space on larger monitors
+									//If the screencolor is different than the color of the board, the frame is not necessary,
+									//as the board is naturally distinguishable from the screen.
+																			
+//the setting of the active canvas in absolute mm is only relevant if parameters.runAbsoluteSizes = true (1)
+//=> IF the screen is not sufficiently big to allow for the absolute canvassize
+//the script will run a default width:height=4:3 and make a note in the data files
+//the default absolute sizes provided here are optimized for ipad use																																						
+/canvasHeight_inmm = 145				//the height of the active canvas in mm (default: 145mm ~ ipad screen height)																					
+/canvasWidth_inmm = 195					//the width of the active canvas in mm (default: 195mm ~ ipad screen width)									
+
+//sizing Parameters in RELATIVE measurements
+//the remaining items are sized relative to CANVAS HEIGHT
+//=> Result: 
+//for absolute canvassizes: you achieve the same absolutely sized stimuli on all screens
+//for relative canvassizes: stimuli are proportionally sized on all screens	
+/ blocksize = 20%						//Size of blocks in % of canvassize.
+										//Note: 20% of 145mm ~ 30mm = 3cm blocksize on all monitors if 
+										//the default absolute screensizes are used
+
+//Timing Parameters	(in ms)						
+/tapinterval = 1000			//Interval between 'taps' in ms. Default is '1000'.
+	
+/posttapinterval = 250		//Time between erasing a previously highlighted block and highlighting the 
+							//next one in ms.
+							
+/feedbackduration = 1000	//Duration of performance feedback after recalling a sequence.
+
+//Feedback Parameters
+/showfeedback = false		//'true' -> show performance feedback after each completed sequence.
+							//'false' -> don't show performance feedback after each completed sequence.
+							//Default is 'false'.
+							
+/showscores	= false			//'true' -> show score summary at the end of the procedure.
+							//'false' -> don't show score summary at the end of the procedure.
+							//Default is 'false'.
+
+//Norming Paramaters
+/ runAgeQuestion = false		//true (1): the user's age can be entered in a textbox before running the task 
+							//false (0): no age information of the participant is sought (default)
+</parameters>
+
+
+**************************************************************************************************************
+**************************************************************************************************************
+	EDITABLE INSTRUCTIONS: change instructions here
+**************************************************************************************************************
+**************************************************************************************************************
+<instruct>
+/ fontstyle = ("Arial", 2.50%, true)
+/ navigationbuttonfontstyle = ("Arial", 3%, true)
+/ screencolor = parameters.boardcolor
+/ txcolor = parameters.defaultTextColor
+</instruct>
+
+<page corsiinstructions> 
+<h1>Welcome to the Corsi Block-Tapping Task!</h1><hr><br>
+This is section 3 out of 3!<br><br>
+You are about to take part in a test that measures your ability to remember a sequence 
+of locations on the screen.<br><br>
+You will see 16 blocks on the screen. On each trial, several blocks will light up one at a time.
+Your job is to remember their <i>exact</i> sequence.<br><br>
+As soon as the sequence is finished, you must repeat the sequence by <%expressions.buttoninstruct1%> the blocks
+IN THE SAME ORDER THEY WERE PRESENTED.<br><br>
+When you are done, <%expressions.buttoninstruct2%> the button labeled DONE. If you made a mistake, <%expressions.buttoninstruct2%> the button
+labeled RESET to start over.<br><br>
+There will be no practice, and sequences will not replay.<br><br>
+There will be 8 total sequences! <br><br>
+"Continue" when you are ready to begin.
+</page>
+
+<expressions>
+/buttoninstruct2 = if (computer.touch && !computer.haskeyboard) {"touch";} else {"click";}
+/buttoninstruct1 = if (computer.touch && !computer.haskeyboard) {"touching";} else {"clicking on";}
+</expressions>
+
+
+**************************************
+	Startup Messages & UI Elements
+**************************************
+<text getready>
+/ items = ("<center><h1>Get ready!</h1></center>")
+/ erase = false
+</text>
+
+<button reset>
+/ caption = "Reset"
+/ fontstyle = ("Arial", 3%, false, false, false, false, 5, 1)
+/ position = (25%,95%)
+/ size = (20%,4%)
+/ erase = false
+</button>
+
+<button Done>
+/ caption = "Done"
+/ fontstyle = ("Arial", 3%, false, false, false, false, 5, 1)
+/ position = (65%,95%)
+/ size = (20%,4%)
+/ erase = false
+</button>
+
+<text resetInstructions>
+/items = ("Start over")
+/ position = (50%, 50%)
+/ txcolor = yellow
+/ txbgcolor = transparent
+/ vjustify = center
+/ size = (50%, 8%)
+/ fontstyle = ("Courier New", 8%, true, false, false, false, 5, 1)
+</text>
+
+**************************************
+	Feedback & Scoring Stims
+**************************************
+
+<text feedbackmsg>
+/ items = ("<center><h3>Wrong!</h3></center>", "<center><h3>Correct!</h3></center>")
+/ select = values.ACC+1
+/ erase = false
+/ erase = false
+</text>
+
+<text scores>
+/ items = ("<center><big><u>Results:</u></big><br><br>
+Block Span = <%values.blockspan%><br>
+Total Score = <%values.totalscore%><br><br><br>
+<h1>Thank you!</h1></center>")
+/ erase = false
+</text>
+
+<button exitButton>
+/ caption = "exit"
+/size = (20%, 8%)
+/ fontstyle = ("Arial", 5%, false, false, false, false, 5, 1)
+/ position = (50%, 90%)
+</button>
+
+
+
+**************************************************************************************************************
+**************************************************************************************************************
+	EDITABLE LISTS: change editable lists here
+**************************************************************************************************************
+**************************************************************************************************************
+
+<list seqnumber>
+/ items = (1,2,3,4,5,6,7)
+/ selectionmode = list.seqlength.currentindex
+</list>
+
+
+<list seqlength>
+/ items = (3,3,3,4,4,5,5)
+/ selectionmode = sequence
+/ resetinterval = 0
+</list>
+
+Note: this list specifies the particular boxes to be lit at each level tested
+	* box labels indicate their position relative to other blocks. 
+	* The first digit (a number 5-8) indicates the row. The smaller the digit is, the higher the row is (5=top row, 8=bottom row)
+	* The second digit (a number 1-4) indicates the column. The smaller the digit is, the closer to the left the column is (1=leftmost column, 4=rightmost column)
+	* stimname_visualization.png shows each square labeled with its stimulus name
+
+<list blockseq>
+/ items = 
+	(61, 84, 74,
+	74, 64, 63, 
+	83, 62, 54,
+	51, 84, 64, 74,
+	64, 62, 83, 51, 
+	81, 83, 62, 74, 52,
+	51, 83, 52, 54, 81)
+/ selectionmode = sequence
+/ resetinterval = 0                      
+</list>
+
+**************************************************************************************************************
+								!!!REMAINING CODE: Customize after careful consideration only!!!
+**************************************************************************************************************
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Default Settings
+**************************************************************************************************************
+**************************************************************************************************************
+
+<defaults>
+/ minimumversion = "6.6.1.0"
+/ inputdevice = mouse
+/ screencolor =parameters.screencolor
+/ fontstyle = ("Arial", 4.00%, true)
+/ txcolor = parameters.defaultTextColor
+/ txbgcolor = parameters.boardcolor
+/ canvassize = (expressions.canvasWidth, expressions.canvasHeight)
+</defaults>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Custom Data Output
+**************************************************************************************************************
+**************************************************************************************************************
+
+***********************
+raw data
+***********************
+
+<data Corsi>
+/ columns = (build, computer.platform, date, time, subject, group, session, values.ageGroup, 
+
+//screen parameters
+parameters.runAbsoluteSizes,
+expressions.canvasAdjustments,
+expressions.activeCanvasHeight_inmm, expressions.activeCanvasWidth_inmm,
+display.canvasheight, display.canvaswidth,
+expressions.px_per_mm,
+
+blockcode, blocknum, trialcode, trialnum,
+values.seqnumber, values.seqlength, values.seqstring, values.respstring,
+response,values.ACC,latency,
+values.ncorrecttotal,values.blockspan,values.totalscore)
+</data>
+
+********************
+summary data
+********************
+
+inquisit.version: 					Inquisit version run
+computer.platform:					the platform the script was run on (win/mac/ios/android)
+startdate:							date script was run
+starttime:							time script was started
+subjectid:							assigned subject id number
+groupid:							assigned group id number
+sessionid:							assigned session id number
+elapsedtime:						time it took to run script (in ms); measured from onset to offset of script
+completed:							0 = script was not completed (prematurely aborted); 
+									1 = script was completed (all conditions run)
+ncorrecttotal:						Total number of correctly recalled sequences across the whole task.
+blockspan:							The achieved Block Span. Equals the length of the last correctly recalled sequence (Max = 5)
+totalscore:							Summary score proposed by Kessels et al. (2000). Computed as 'values.blockspan' * 'values.ncorrecttotal'.										
+
+<summarydata Corsi>
+/ columns = (script.startdate, script.starttime, script.subjectid, script.sessionid, script.elapsedtime, script.completed, 
+values.ncorrecttotal, values.blockspan, values.totalscore)	
+</summarydata>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	VALUES: automatically updated
+**************************************************************************************************************
+**************************************************************************************************************	
+	completed:				0 = script was not completed; 1 = script was completed (all conditions run)
+
+	seqnumber				The ordinal number of the current block sequence. Seven 
+							sequences are given in ascending order.
+	seqlength				Length of the current block sequence.
+	seqstring				The current sequence.
+	respstring				The sequence entered by the participant.
+	correct					'1' if the current sequence was recalled correctly. '0' if the participant
+							made a mistake.
+	ncorrecttotal			Total number of correctly recalled sequences across the whole task.
+	blockspan				The achieved Block Span. Equals the length of the last correctly recalled
+							sequence.
+	totalscore				Number correct
+
+
+<values taskparams>
+/ seqnumber = 0
+/ seqlength = 0
+/ seqstring = ""
+/ respstring = ""
+/ ACC = 0 
+/ ncorrecttotal = 0
+/ highlightedblock = 0
+/ tapcount = 0
+/ blockspan = 0
+/ totalscore = 0
+</values>
+
+
+**************************************************************************************************************
+**************************************************************************************************************
+	EXPRESSIONS
+**************************************************************************************************************
+**************************************************************************************************************
+
+//////////////////////////////////////////////////////////////////////////////////
+The following expressions are used for canvas scaling
+//////////////////////////////////////////////////////////////////////////////////
+
+//functions to calculate screen/canvas areas of the current screen
+<expressions>
+/ px_per_mm = display.height/display.getmmy(display.height, 1)
+/screenHeight_inmm = display.getmmy(display.height)
+/screenWidth_inmm = display.getmmx(display.width)
+/canvasHeight = if (parameters.runAbsoluteSizes == true && 
+	expressions.screenHeight_inmm >= parameters.canvasHeight_inmm &&
+	expressions.screenWidth_inmm >= parameters.canvasWidth_inmm){
+	1mm * parameters.canvasHeight_inmm;
+} else {
+	1px * display.height;	
+}
+
+/canvasWidth = if (parameters.runAbsoluteSizes == true && 
+	expressions.screenHeight_inmm >= parameters.canvasHeight_inmm &&
+	expressions.screenWidth_inmm >= parameters.canvasWidth_inmm){
+		1mm * parameters.canvasWidth_inmm;
+} else {
+		1px * display.height * 4/3;
+}
+/activeCanvasHeight = if (parameters.runAbsoluteSizes == true && 
+	expressions.screenHeight_inmm >= parameters.canvasHeight_inmm &&
+	expressions.screenWidth_inmm >= parameters.canvasWidth_inmm){
+		1mm * (parameters.canvasHeight_inmm - 1);
+	} else {
+		1px * (expressions.canvasHeight*0.99)
+	}
+/activeCanvasWidth = if (parameters.runAbsoluteSizes == true && 
+	expressions.screenHeight_inmm >= parameters.canvasHeight_inmm &&
+	expressions.screenWidth_inmm >= parameters.canvasWidth_inmm){
+		1mm * (parameters.canvasWidth_inmm - 1);
+	} else {
+		1px * (expressions.canvasWidth*0.99)
+	}	
+/canvasAdjustments = {
+	if (!parameters.runAbsoluteSizes){
+		return "N/A";
+	} else if (expressions.screenHeight_inmm >= parameters.canvasHeight_inmm &&
+		expressions.screenWidth_inmm >= parameters.canvasWidth_inmm){
+		return "0";
+	} else {
+		return "1";
+	}
+}
+
+//display sizes:
+/displayheight_inmm = 1mm*display.getmmy(display.canvasheight)
+/displaywidth_inmm = 1mm*display.getmmx(display.canvaswidth)
+
+//play area sizes in screen percent and pixels:
+/activeCanvasHeight_inmm = expressions.displayheight_inmm
+/activeCanvasWidth_inmm = expressions.displaywidth_inmm
+/activeCanvasHeight_inpct = 100%
+/activeCanvasWidth_inpct = 100%
+/activeCanvasHeight_inpx = 1px*display.getpixelsy(expressions.activeCanvasHeight_inpct)
+/activeCanvasWidth_inpx = 1px*display.getpixelsx(expressions.activeCanvasWidth_inpct)
+
+/activeCanvas_center_y_inpx = 1px*display.getpixelsy(50%)
+/activeCanvas_center_x_inpx = 1px*display.getpixelsx(50%)
+
+/leftactiveCanvasBorder_inpx = 1px* (expressions.activeCanvas_center_x_inpx - 0.5*expressions.activeCanvasWidth_inpx)
+/rightactiveCanvasBorder_inpx = 1px* (expressions.activeCanvas_center_x_inpx + 0.5*expressions.activeCanvasWidth_inpx)
+/topactiveCanvasBorder_inpx = 1px* (expressions.activeCanvas_center_y_inpx - 0.5*expressions.activeCanvasHeight_inpx)
+/bottomactiveCanvasBorder_inpx = 1px* (expressions.activeCanvas_center_y_inpx + 0.5*expressions.activeCanvasHeight_inpx)
+
+/propActiveCanvasWidth = {
+	var width0 = shape.activeCanvas.width/shape.activeCanvas_frame.width;
+	var width = substring(width0, 0, length(width0)-2);
+	return (width*100%);
+}
+/propActiveCanvasheight = {
+	var height0 = shape.activeCanvas.height/shape.activeCanvas_frame.height;
+	var height = substring(height0, 0, length(height0)-2);
+	return (height*100%);
+}
+</expressions>
+
+////////////////////////////////////////////////
+screen area used for experiment presentation
+////////////////////////////////////////////////
+
+<shape activeCanvas>
+/ shape = rectangle
+/ width = expressions.activeCanvasWidth
+/ height = expressions.activeCanvasHeight
+/ vposition = 50%
+/ hposition = 50%
+/ color = parameters.boardcolor
+/ erase = false
+</shape>
+
+<shape activeCanvas_frame>
+/ onprepare = [
+	if (parameters.hideCanvasFrame){
+		shape.activeCanvas_frame.skip = true;
+	};
+]
+/ shape = rectangle
+/ width = expressions.canvasWidth
+/ height = expressions.canvasHeight
+/ color = parameters.boardFrameColor
+/ erase = false
+/ vposition = 50%
+/ hposition = 50%
+</shape>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Stimulus Elements
+**************************************************************************************************************
+**************************************************************************************************************
+	Square Stims ("Blocks")
+**************************************************************************************************************
+**************************************************************************************************************
+
+<text 51>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 14%
+/ vposition = 14%
+</text>
+
+<text 52>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 38%
+/ vposition = 14%
+</text>
+
+<text 53>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 62%
+/ vposition = 14%
+</text>
+
+<text 54>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 86%
+/ vposition = 14%
+</text>
+
+<text 61>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 14%
+/ vposition = 36%
+</text>
+
+<text 62>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 38%
+/ vposition = 36%
+</text>
+
+<text 63>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 62%
+/ vposition = 36%
+</text>
+
+<text 64>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 86%
+/ vposition = 36%
+</text>
+
+<text 71>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 14%
+/ vposition = 58%
+</text>
+
+<text 72>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 38%
+/ vposition = 58%
+</text>
+
+<text 73>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 62%
+/ vposition = 58%
+</text>
+
+<text 74>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 86%
+/ vposition = 58%
+</text>
+
+<text 81>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 14%
+/ vposition = 80%
+</text>
+
+<text 82>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 38%
+/ vposition = 80%
+</text>
+
+<text 83>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 62%
+/ vposition = 80%
+</text>
+
+<text 84>
+/ items = (" ")
+/ size = (parameters.blocksize * display.canvasheight/display.canvaswidth, parameters.blocksize)
+/ hjustify = center
+/ vjustify = center
+/ erase = true(transparent)
+/ hposition = 86%
+/ vposition = 80%
+</text>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Background Shape ("Board")
+**************************************************************************************************************
+**************************************************************************************************************
+<shape board>
+/ shape = rectangle
+/ color = parameters.boardcolor
+/ erase = false
+/ position = (50%, 50%)
+/ width = expressions.activeCanvasWidth
+/ height = expressions.activeCanvasHeight
+/ vposition = 50%
+</shape>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Debug Stuff
+**************************************************************************************************************
+**************************************************************************************************************
+<text debug>
+/ items = ("Given Sequence=<%values.seqstring%> | Recalled Sequence=<%values.respstring%>
+Blockspan=<%values.blockspan%> | Total Score=<%values.totalscore%>")
+/ erase = false
+/ size = (50%,4%)
+/ position = (50%, 0%)
+/ vjustify = center
+/ valign = top
+/ halign = center
+/ txbgcolor = white
+/ fontstyle = ("Arial", 1.50%, true)
+</text>
+
+<trial debug>
+/ stimulustimes = [0=board, 51,52,53,54,61,62,63,64,71,72,73,74,81,82,83,84, reset, done]
+/ ontrialbegin = [values.seqlength=list.seqlength.nextvalue; 
+	values.seqnumber=list.seqnumber.nextvalue; values.tapcount=0; values.ACC=0;
+	values.seqstring=""; values.respstring=""]
+/ ontrialend = [text.51.textbgcolor=red; text.52.textbgcolor=parameters.blockcolor; 
+	text.53.textbgcolor=parameters.52blockcolor; text.54.textbgcolor=parameters.blockcolor; 
+	text.61.textbgcolor=parameters.blockcolor; text.62.textbgcolor=parameters.blockcolor;
+	text.63.textbgcolor=parameters.blockcolor; text.64.textbgcolor=parameters.blockcolor; 
+	text.71.textbgcolor=parameters.blockcolor; text.72.textbgcolor=parameters.blockcolor; 
+	text.73.textbgcolor=parameters.blockcolor; text.74.textbgcolor=parameters.blockcolor; 
+	text.81.textbgcolor=parameters.blockcolor; text.82.textbgcolor=parameters.blockcolor; 
+	text.83.textbgcolor=parameters.blockcolor; text.84.textbgcolor=parameters.blockcolor]
+/ branch = [trial.showseq]
+/validresponse = (1)
+/ recorddata = false
+</trial>
+
+<block debug>
+/trials = [1=debug]
+</block>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Trial Elements
+**************************************************************************************************************
+**************************************************************************************************************
+	Get Sequence
+**************************************************************************************************************
+**************************************************************************************************************
+<trial getseq>
+/ stimulustimes = [0= activeCanvas_frame, board,getready; 1000=activeCanvas_frame, board,51,52,53,54,61,62,63,64,71,72,73,74,81,82,83,84]
+/ ontrialbegin = [values.seqlength=list.seqlength.nextvalue; 
+	values.seqnumber=list.seqnumber.nextvalue; values.tapcount=0; values.ACC=0;
+	values.seqstring=""; values.respstring=""]
+/ ontrialend = [text.51.textbgcolor=parameters.blockcolor; text.52.textbgcolor=parameters.blockcolor; 
+	text.53.textbgcolor=parameters.blockcolor; text.54.textbgcolor=parameters.blockcolor; 
+	text.61.textbgcolor=parameters.blockcolor; text.62.textbgcolor=parameters.blockcolor;
+	text.63.textbgcolor=parameters.blockcolor; text.64.textbgcolor=parameters.blockcolor; 
+	text.71.textbgcolor=parameters.blockcolor; text.72.textbgcolor=parameters.blockcolor; 
+	text.73.textbgcolor=parameters.blockcolor; text.74.textbgcolor=parameters.blockcolor; 
+	text.81.textbgcolor=parameters.blockcolor; text.82.textbgcolor=parameters.blockcolor; 
+	text.83.textbgcolor=parameters.blockcolor; text.84.textbgcolor=parameters.blockcolor]
+/ branch = [trial.showseq]
+/ validresponse = (noresponse)
+/ trialduration = 2000
+/ recorddata = false
+</trial>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Show Sequence
+**************************************************************************************************************
+**************************************************************************************************************
+<trial showseq>
+/ ontrialbegin = [
+	values.highlightedblock=list.blockseq.nextvalue;
+	values.tapcount+=1;
+	
+	if(values.highlightedblock==51) {
+		text.51.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==52) {
+		text.52.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==53) {
+		text.53.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==54) {
+		text.54.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==61) {
+		text.61.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==62) {
+		text.62.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==63) {
+		text.63.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==64) {
+		text.64.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==71) {
+		text.71.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==72) {
+		text.72.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==73) {
+		text.73.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==74) {
+		text.74.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==81) {
+		text.81.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==82) {
+		text.82.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==83) {
+		text.83.textbgcolor=parameters.tapcolor;
+	} else if(values.highlightedblock==84) {
+		text.84.textbgcolor=parameters.tapcolor;
+	};
+	
+]
+/ stimulusframes = [1=activeCanvas_frame, board,51,52,53,54,61,62,63,64,71,72,73,74,81,82,83,84]
+/ validresponse = (noresponse)
+/ trialduration = parameters.tapinterval
+/ontrialend = [	
+	text.51.textbgcolor=parameters.blockcolor;
+	text.52.textbgcolor=parameters.blockcolor;
+	text.53.textbgcolor=parameters.blockcolor;
+	text.54.textbgcolor=parameters.blockcolor;
+	text.61.textbgcolor=parameters.blockcolor;
+	text.62.textbgcolor=parameters.blockcolor;
+	text.63.textbgcolor=parameters.blockcolor;
+	text.64.textbgcolor=parameters.blockcolor;
+	text.71.textbgcolor=parameters.blockcolor;
+	text.72.textbgcolor=parameters.blockcolor;
+	text.73.textbgcolor=parameters.blockcolor;
+	text.74.textbgcolor=parameters.blockcolor;
+	text.81.textbgcolor=parameters.blockcolor;
+	text.82.textbgcolor=parameters.blockcolor;
+	text.83.textbgcolor=parameters.blockcolor;
+	text.84.textbgcolor=parameters.blockcolor;
+
+	values.seqstring=concat(values.seqstring,values.highlightedblock);
+]
+/ posttrialpause = parameters.posttapinterval
+/ branch = [
+	if(values.tapcount<values.seqlength) {
+		return trial.showseq;
+	} else {
+		return trial.recallseq;
+	};
+]
+/ recorddata = false
+</trial>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Recall Sequence
+**************************************************************************************************************
+**************************************************************************************************************
+
+<trial recallseq>
+/ inputdevice = mouse
+/ stimulusframes = [1=activeCanvas_frame, board,51,52,53,54,61,62,63,64,71,72,73,74,81,82,83,84,reset,done]
+/ validresponse = (51,52,53,54,61,62,63,64,71,72,73,74,81,82,83,84,reset,done)
+/ ontrialend = [
+
+	if(trial.recallseq.response=="51") {
+		text.51.textbgcolor=parameters.tapcolor;
+	} else {
+		text.51.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="52") {
+		text.52.textbgcolor=parameters.tapcolor;
+	} else {
+		text.52.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="53") {
+		text.53.textbgcolor=parameters.tapcolor;
+	} else {
+		text.53.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="54") {
+		text.54.textbgcolor=parameters.tapcolor;
+	} else {
+		text.54.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="61") {
+		text.61.textbgcolor=parameters.tapcolor;
+	} else {
+		text.61.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="62") {
+		text.62.textbgcolor=parameters.tapcolor;
+	} else {
+		text.62.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="63") {
+		text.63.textbgcolor=parameters.tapcolor;
+	} else {
+		text.63.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="64") {
+		text.64.textbgcolor=parameters.tapcolor;
+	} else {
+		text.64.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="71") {
+		text.71.textbgcolor=parameters.tapcolor;
+	} else {
+		text.71.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="72") {
+		text.72.textbgcolor=parameters.tapcolor;
+	} else {
+		text.72.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="73") {
+		text.73.textbgcolor=parameters.tapcolor;
+	} else {
+		text.73.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="74") {
+		text.74.textbgcolor=parameters.tapcolor;
+	} else {
+		text.74.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="81") {
+		text.81.textbgcolor=parameters.tapcolor;
+	} else {
+		text.81.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="82") {
+		text.82.textbgcolor=parameters.tapcolor;
+	} else {
+		text.82.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="83") {
+		text.83.textbgcolor=parameters.tapcolor;
+	} else {
+		text.83.textbgcolor=parameters.blockcolor;
+	};
+	if(trial.recallseq.response=="84") {
+		text.84.textbgcolor=parameters.tapcolor;
+	} else {
+		text.84.textbgcolor=parameters.blockcolor;
+	};
+
+	if (trial.recallseq.response=="reset"){
+		values.respstring="";
+		text.51.textbgcolor=parameters.blockcolor; 
+		text.52.textbgcolor=parameters.blockcolor; 
+		text.53.textbgcolor=parameters.blockcolor; 
+		text.54.textbgcolor=parameters.blockcolor; 
+		text.61.textbgcolor=parameters.blockcolor; 
+		text.62.textbgcolor=parameters.blockcolor;
+		text.63.textbgcolor=parameters.blockcolor; 
+		text.64.textbgcolor=parameters.blockcolor;
+		text.71.textbgcolor=parameters.blockcolor;
+		text.72.textbgcolor=parameters.blockcolor;
+		text.73.textbgcolor=parameters.blockcolor;
+		text.74.textbgcolor=parameters.blockcolor;
+		text.81.textbgcolor=parameters.blockcolor;
+		text.82.textbgcolor=parameters.blockcolor;
+		text.83.textbgcolor=parameters.blockcolor;
+		text.84.textbgcolor=parameters.blockcolor;	
+	} else if (trial.recallseq.response=="done"){
+		if (values.respstring==values.seqstring){
+			values.ACC=1; 
+			values.ncorrecttotal+=1; 
+			values.blockspan=values.seqlength;
+		};
+		values.totalscore=values.blockspan*values.ncorrecttotal;		
+	} else {
+		values.respstring=concat(values.respstring,trial.recallseq.response);		
+	};
+]
+
+/ branch = [
+	if(trial.recallseq.response!="done") {
+		return trial.recallseq;
+	} else {
+		return trial.showfeedback;
+	};
+]
+/ responsemessage = ("reset", text.resetInstructions, 500)
+</trial>
+
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Show Feedback
+**************************************************************************************************************
+**************************************************************************************************************
+<trial showfeedback>
+/ skip = [parameters.showfeedback==false]
+/ stimulusframes = [1=clearscreen, activeCanvas_frame, board, feedbackmsg]
+/ validresponse = (noresponse)
+/ trialduration = parameters.feedbackduration
+/ recorddata = false
+</trial>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Show Scores
+**************************************************************************************************************
+**************************************************************************************************************
+<trial showscores>
+/ stimulusframes = [1=activeCanvas_frame, board, scores, exitButton]
+/ validresponse = (exitButton)
+/ recorddata = false
+</trial>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Block Elements
+**************************************************************************************************************
+**************************************************************************************************************
+#Edit area
+<block instructionsblock>
+/ postinstructions = (corsiinstructions)
+/ trials = [1 = surveypage.age]
+</block>
+
+<block corsiblock>
+/ trials = [1=getseq]
+</block>
+
+<block scoreblock>
+/ skip = [parameters.showscores==false]
+/ trials = [1=showscores]
+</block>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Norms (source: Kessels et al, 2000)
+**************************************************************************************************************
+**************************************************************************************************************
+
+<radiobuttons age>
+/ caption = "Age:"
+/ options = ("<= 20", "21-40", ">40")
+/ optionvalues = ("1", "2", "3")
+/ required = true
+/ txcolor = white
+</radiobuttons>
+
+<surveypage age>
+/ skip = [
+	parameters.runAgeQuestion == false
+]
+/ stimulusframes = [1 = board]
+/ caption = "Select your age group"
+/ questions = [1 = age]
+/ fontstyle = ("Arial", 4%, true, false, false, false, 5, 1)
+/ txcolor = white
+/ itemfontstyle = ("Arial", 3%, true, false, false, false, 5, 1)
+/ responsefontstyle = ("Arial", 2.5%, false, false, false, false, 5, 1)
+/ showpagenumbers = false
+/ showquestionnumbers = false
+/ ontrialend = [
+	values.ageGroup = radiobuttons.age.response;
+]
+/ navigationbuttonfontstyle = ("Arial", 3%, false, false, false, false, 5, 1)
+/ finishlabel = "Continue"
+/ nextlabel = "Continue"
+</surveypage>
+							
+<values>
+/meanBlockspan = 6.2
+/SD_Blockspan = 1.3
+/meanTotalscore = 55.7
+/SD_Totalscore = 20.3
+/p_Totalscore_byAge = "age not known"
+/minP = 0
+/maxP = 0
+/minScore = 0
+/maxScore = 0
+/ageGroup = "not known"
+</values>
+		
+<expressions>
+/z_Blockspan = (values.blockspan - values.meanBlockspan)/values.SD_Blockspan
+/p_Blockspan = pofz(expressions.z_Blockspan)
+/z_Totalscore = (values.totalscore - values.meanTotalscore)/values.SD_Totalscore
+/p_Totalscore = pofz(expressions.z_Totalscore)
+</expressions>
+
+**************************************************************************************************************
+**************************************************************************************************************
+	Experiment Elements
+**************************************************************************************************************
+**************************************************************************************************************
+<expt corsitask>
+/ onexptbegin = [
+	text.51.erasecolor=parameters.blockcolor; 
+	text.52.erasecolor=parameters.blockcolor; 
+	text.53.erasecolor=parameters.blockcolor; 
+	text.54.erasecolor=parameters.blockcolor; 
+	text.61.erasecolor=parameters.blockcolor; 
+	text.62.erasecolor=parameters.blockcolor; 
+	text.63.erasecolor=parameters.blockcolor; 
+	text.64.erasecolor=parameters.blockcolor; 
+	text.71.erasecolor=parameters.blockcolor;
+	text.72.erasecolor=parameters.blockcolor;
+	text.73.erasecolor=parameters.blockcolor;
+	text.74.erasecolor=parameters.blockcolor;
+	text.81.erasecolor=parameters.blockcolor;
+	text.82.erasecolor=parameters.blockcolor;
+	text.83.erasecolor=parameters.blockcolor;
+	text.84.erasecolor=parameters.blockcolor;
+	
+
+
+	text.51.textbgcolor=parameters.blockcolor; 
+	text.52.textbgcolor=parameters.blockcolor; 
+	text.53.textbgcolor=parameters.blockcolor; 
+	text.54.textbgcolor=parameters.blockcolor; 
+	text.61.textbgcolor=parameters.blockcolor; 
+	text.62.textbgcolor=parameters.blockcolor; 
+	text.63.textbgcolor=parameters.blockcolor; 
+	text.64.textbgcolor=parameters.blockcolor; 
+	text.71.textbgcolor=parameters.blockcolor;
+	text.72.textbgcolor=parameters.blockcolor;
+	text.73.textbgcolor=parameters.blockcolor;
+	text.74.textbgcolor=parameters.blockcolor;
+	text.81.textbgcolor=parameters.blockcolor;
+	text.82.textbgcolor=parameters.blockcolor;
+	text.83.textbgcolor=parameters.blockcolor;
+	text.84.textbgcolor=parameters.blockcolor;	
+
+	shape.board.color=parameters.boardcolor;
+]
+/ blocks = [
+	1=instructionsblock; 
+	2-8=corsiblock; 
+	9=scoreblock;
+]
+</expt>
+
+***********************************************************************************************************
+**************************************************************************************************************
+	End Of File
+**************************************************************************************************************
+**************************************************************************************************************
